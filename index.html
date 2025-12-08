@@ -1,144 +1,112 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Painel Uber</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<title>Vídeo + Clima</title>
 
-  <style>
+<style>
     body {
-      margin: 0;
-      background: #000;
-      font-family: Arial, sans-serif;
-      color: #ffffff;
-      overflow: hidden;
-      display: flex;
-      height: 100vh;
-    }
-
-    /* Layout horizontal: vídeo à esquerda, infos à direita */
-    #video-container {
-      flex: 1.2;
-      background: #000;
+        margin: 0;
+        background: #000;
+        overflow: hidden;
     }
 
     video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+        width: 100vw;
+        height: 100vh;
+        object-fit: cover;
     }
 
-    #info-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 20px;
-      background: rgba(0, 0, 0, 0.75);
+    #climaBox {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0,0,0,0.75);
+        color: #fff;
+        text-align: center;
+        padding-top: 80px;
+        font-family: Arial, sans-serif;
     }
 
-    .card {
-      background: #111;
-      padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 10px;
+    #titulo {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 20px;
     }
 
-    h2 {
-      font-size: 20px;
-      margin: 0 0 10px;
-      color: #73c7ff;
-      text-transform: uppercase;
+    #temp {
+        font-size: 5rem;
+        margin: 20px 0;
     }
 
-    .news-item {
-      margin-bottom: 10px;
-      font-size: 15px;
-      line-height: 1.3;
+    #condicao {
+        font-size: 2rem;
+        margin-bottom: 10px;
     }
-  </style>
+
+    #chuva {
+        font-size: 1.8rem;
+    }
+</style>
 </head>
-
 <body>
 
-  <!-- Vídeo -->
-  <div id="video-container">
-    <video autoplay loop muted playsinline>
-      <source src="https://www.dropbox.com/scl/fi/mx1gffddszn76nfmccrrf/video.mp4.mp4?rlkey=ic8n9kwmuvxvahukwkuwflysj&st=1p2ibi71&raw=1" type="video/mp4">
-    </video>
-  </div>
+<!-- SEU VÍDEO -->
+<video id="video" autoplay muted playsinline>
+    <source src="video.mp4.mp4" type="video/mp4">
+</video>
 
-  <!-- Painel de informações -->
-  <div id="info-container">
+<!-- CAIXA DO CLIMA -->
+<div id="climaBox">
+    <div id="titulo">Clima em São Paulo</div>
+    <div id="temp">--°C</div>
+    <div id="condicao">Carregando...</div>
+    <div id="chuva"></div>
+</div>
 
-    <div class="card" id="clima">
-      <h2>Clima - São Paulo</h2>
-      <div id="weather-data">Carregando...</div>
-    </div>
+<script>
+// =============== CONFIG ===============
+const API_KEY = "1dea43cad08e41d9907200706250812";
+const CITY = "São Paulo";
+const DELAY_CLIMA = 10000; // 10 segundos
+// ======================================
 
-    <div class="card">
-      <h2>Brasil</h2>
-      <div id="news-brasil">Carregando...</div>
-    </div>
+const video = document.getElementById("video");
+const climaBox = document.getElementById("climaBox");
 
-    <div class="card">
-      <h2>Mundo</h2>
-      <div id="news-mundo">Carregando...</div>
-    </div>
+async function carregarClima() {
+    try {
+        const url = `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${CITY}&lang=pt`;
+        const response = await fetch(url);
+        const data = await response.json();
 
-    <div class="card">
-      <h2>Esportes</h2>
-      <div id="news-esportes">Carregando...</div>
-    </div>
+        document.getElementById("temp").innerText = `${data.current.temp_c}°C`;
+        document.getElementById("condicao").innerText = data.current.condition.text;
+        document.getElementById("chuva").innerText = `Chance de chuva: ${data.current.precip_mm} mm`;
 
-  </div>
-
-  <script>
-    // --- API de clima (Open-Meteo = grátis e não precisa chave)
-    async function carregarClima() {
-      try {
-        const url = "https://api.open-meteo.com/v1/forecast?latitude=-23.55&longitude=-46.64&current_weather=true";
-        const r = await fetch(url);
-        const d = await r.json();
-
-        document.getElementById("weather-data").innerHTML = `
-          <strong>${d.current_weather.temperature}°C</strong><br>
-          Vento: ${d.current_weather.windspeed} km/h
-        `;
-      } catch {
-        document.getElementById("weather-data").innerText = "Erro ao carregar clima.";
-      }
+    } catch (e) {
+        document.getElementById("condicao").innerText = "Erro ao carregar clima";
     }
+}
 
-    // --- API de notícias (GNews - fonte gratuita)
-    async function carregarNoticias(categoria, alvo) {
-      try {
-        const url = `https://gnews.io/api/v4/top-headlines?category=${categoria}&lang=pt&country=br&max=3&apikey=demo`;
-        const r = await fetch(url);
-        const data = await r.json();
+function mostrarClima() {
+    climaBox.style.display = "block";
+    setTimeout(() => {
+        climaBox.style.display = "none";
+        video.currentTime = 0;
+        video.play();
+    }, DELAY_CLIMA);
+}
 
-        document.getElementById(alvo).innerHTML =
-          data.articles
-            .map(n => `<div class="news-item">• ${n.title}</div>`)
-            .join("");
-
-      } catch {
-        document.getElementById(alvo).innerText = "Erro ao carregar notícias.";
-      }
-    }
-
-    // Atualização automática
+video.onended = () => {
     carregarClima();
-    carregarNoticias("general", "news-brasil");
-    carregarNoticias("world", "news-mundo");
-    carregarNoticias("sports", "news-esportes");
-
-    setInterval(carregarClima, 1000 * 60 * 5);  // clima a cada 5 minutos
-    setInterval(() => {
-      carregarNoticias("general", "news-brasil");
-      carregarNoticias("world", "news-mundo");
-      carregarNoticias("sports", "news-esportes");
-    }, 1000 * 60 * 8); // notícias a cada 8 minutos
-  </script>
+    mostrarClima();
+};
+</script>
 
 </body>
 </html>
