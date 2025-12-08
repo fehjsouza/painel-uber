@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Painel Uber - Vídeo + Notícias + Clima</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background: #000;
+        overflow: hidden;
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+    }
+
+    #video {
+        flex: 3;
+        background: #000;
+    }
+
+    #video video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    #sidebar {
+        flex: 1;
+        background: #111;
+        color: white;
+        font-family: Arial;
+        padding: 15px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        overflow-y: auto;
+    }
+
+    .section {
+        background: #222;
+        padding: 10px;
+        border-radius: 8px;
+    }
+
+    h2 {
+        margin: 0;
+        font-size: 20px;
+        color: #4db8ff;
+    }
+
+    .news-item {
+        margin-top: 10px;
+        font-size: 15px;
+        border-bottom: 1px solid #444;
+        padding-bottom: 10px;
+    }
+
+</style>
+</head>
+<body>
+
+<div id="video">
+    <!-- Link direto do Google Drive ENTRA AQUI -->
+    <video id="painelVideo" autoplay loop muted playsinline></video>
+</div>
+
+<div id="sidebar">
+    <div class="section">
+        <h2>São Paulo - Agora</h2>
+        <div id="weather">Carregando clima...</div>
+    </div>
+
+    <div class="section">
+        <h2>Notícias Brasil</h2>
+        <div id="news">Carregando notícias...</div>
+    </div>
+</div>
+
+<script>
+
+/* --- SETAR LINK DO VÍDEO --- */
+const videoURL = "https://drive.google.com/uc?export=download&id=12vMuox6DCW8s8N6MjbwpOIEEmEP0uzEw";
+document.getElementById("painelVideo").src = videoURL;
+
+/* --- CLIMA --- */
+async function loadWeather() {
+    try {
+        const url = "https://api.open-meteo.com/v1/forecast?latitude=-23.55&longitude=-46.63&current_weather=true";
+        const res = await fetch(url);
+        const data = await res.json();
+
+        document.getElementById("weather").innerHTML = `
+            <b>${data.current_weather.temperature}°C</b><br>
+            Vento: ${data.current_weather.windspeed} km/h
+        `;
+    } catch (e) {
+        document.getElementById("weather").innerText = "Erro ao carregar clima.";
+    }
+}
+
+/* --- NOTÍCIAS --- */
+async function loadNews() {
+    try {
+        const url = "https://gnews.io/api/v4/top-headlines?country=br&lang=pt&apikey=demo";
+        const res = await fetch(url);
+        const data = await res.json();
+
+        let html = "";
+
+        data.articles.slice(0, 8).forEach(n => {
+            html += `
+                <div class="news-item">
+                    <b>${n.title}</b><br>
+                    <small>${n.publishedAt.replace("T"," ").replace("Z","")}</small>
+                </div>
+            `;
+        });
+
+        document.getElementById("news").innerHTML = html;
+
+    } catch (e) {
+        document.getElementById("news").innerText = "Erro ao carregar notícias.";
+    }
+}
+
+loadWeather();
+loadNews();
+setInterval(loadWeather, 300000);
+setInterval(loadNews, 300000);
+
+</script>
+
+</body>
+</html>
