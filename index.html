@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel Uber</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      font-family: Arial, sans-serif;
+      color: #ffffff;
+      overflow: hidden;
+      display: flex;
+      height: 100vh;
+    }
+
+    /* Layout horizontal: vídeo à esquerda, infos à direita */
+    #video-container {
+      flex: 1.2;
+      background: #000;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    #info-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.75);
+    }
+
+    .card {
+      background: #111;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+    }
+
+    h2 {
+      font-size: 20px;
+      margin: 0 0 10px;
+      color: #73c7ff;
+      text-transform: uppercase;
+    }
+
+    .news-item {
+      margin-bottom: 10px;
+      font-size: 15px;
+      line-height: 1.3;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Vídeo -->
+  <div id="video-container">
+    <video autoplay loop muted playsinline>
+      <source src="https://drive.google.com/uc?export=download&id=12vMuox6DCW8s8N6MjbwpOIEEmEP0uzEw" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- Painel de informações -->
+  <div id="info-container">
+
+    <div class="card" id="clima">
+      <h2>Clima - São Paulo</h2>
+      <div id="weather-data">Carregando...</div>
+    </div>
+
+    <div class="card">
+      <h2>Brasil</h2>
+      <div id="news-brasil">Carregando...</div>
+    </div>
+
+    <div class="card">
+      <h2>Mundo</h2>
+      <div id="news-mundo">Carregando...</div>
+    </div>
+
+    <div class="card">
+      <h2>Esportes</h2>
+      <div id="news-esportes">Carregando...</div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- API de clima (Open-Meteo = grátis e não precisa chave)
+    async function carregarClima() {
+      try {
+        const url = "https://api.open-meteo.com/v1/forecast?latitude=-23.55&longitude=-46.64&current_weather=true";
+        const r = await fetch(url);
+        const d = await r.json();
+
+        document.getElementById("weather-data").innerHTML = `
+          <strong>${d.current_weather.temperature}°C</strong><br>
+          Vento: ${d.current_weather.windspeed} km/h
+        `;
+      } catch {
+        document.getElementById("weather-data").innerText = "Erro ao carregar clima.";
+      }
+    }
+
+    // --- API de notícias (GNews - fonte gratuita)
+    async function carregarNoticias(categoria, alvo) {
+      try {
+        const url = `https://gnews.io/api/v4/top-headlines?category=${categoria}&lang=pt&country=br&max=3&apikey=demo`;
+        const r = await fetch(url);
+        const data = await r.json();
+
+        document.getElementById(alvo).innerHTML =
+          data.articles
+            .map(n => `<div class="news-item">• ${n.title}</div>`)
+            .join("");
+
+      } catch {
+        document.getElementById(alvo).innerText = "Erro ao carregar notícias.";
+      }
+    }
+
+    // Atualização automática
+    carregarClima();
+    carregarNoticias("general", "news-brasil");
+    carregarNoticias("world", "news-mundo");
+    carregarNoticias("sports", "news-esportes");
+
+    setInterval(carregarClima, 1000 * 60 * 5);  // clima a cada 5 minutos
+    setInterval(() => {
+      carregarNoticias("general", "news-brasil");
+      carregarNoticias("world", "news-mundo");
+      carregarNoticias("sports", "news-esportes");
+    }, 1000 * 60 * 8); // notícias a cada 8 minutos
+  </script>
+
+</body>
+</html>
