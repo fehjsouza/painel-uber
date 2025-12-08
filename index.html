@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-<title>Vídeo + Clima</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Vídeo + Clima</title>
 
 <style>
     body {
         margin: 0;
         background: #000;
         overflow: hidden;
+        font-family: "Segoe UI", Arial, sans-serif;
     }
 
     video {
@@ -18,83 +19,123 @@
         object-fit: cover;
     }
 
+    /* Painel de clima estilo Apple */
     #climaBox {
-        display: none;
         position: absolute;
         top: 0;
         left: 0;
         width: 100vw;
         height: 100vh;
-        background: rgba(0,0,0,0.75);
+        display: none;
+
+        backdrop-filter: blur(12px) brightness(0.35);
+        -webkit-backdrop-filter: blur(12px) brightness(0.35);
+
         color: #fff;
         text-align: center;
-        padding-top: 80px;
-        font-family: Arial, sans-serif;
+        padding-top: 60px;
+
+        animation: fadeIn 0.6s ease forwards;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
     }
 
     #titulo {
         font-size: 3rem;
-        font-weight: bold;
-        margin-bottom: 20px;
+        font-weight: 300;
+        margin-bottom: 10px;
+        letter-spacing: 1px;
+    }
+
+    #iconeClima {
+        width: 140px;
+        height: 140px;
+        margin: 0 auto 20px auto;
     }
 
     #temp {
-        font-size: 5rem;
-        margin: 20px 0;
+        font-size: 6rem;
+        font-weight: 200;
+        margin-bottom: 10px;
     }
 
     #condicao {
         font-size: 2rem;
-        margin-bottom: 10px;
+        opacity: 0.9;
+        margin-bottom: 25px;
     }
 
-    #chuva {
-        font-size: 1.8rem;
+    #extraInfo {
+        font-size: 1.6rem;
+        opacity: 0.85;
+        margin-top: 20px;
+        line-height: 2.4rem;
     }
 </style>
+
 </head>
 <body>
 
-<!-- SEU VÍDEO DO DROPBOX -->
+<!-- VÍDEO DO DROPBOX -->
 <video id="video" autoplay muted playsinline>
     <source src="https://www.dropbox.com/scl/fi/mx1gffddszn76nfmccrrf/video.mp4.mp4?rlkey=ic8n9kwmuvxvahukwkuwflysj&st=1p2ibi71&raw=1" type="video/mp4">
 </video>
 
-<!-- CAIXA DO CLIMA -->
+<!-- PAINEL CLIMA -->
 <div id="climaBox">
-    <div id="titulo">Clima em São Paulo</div>
+    <div id="titulo">São Paulo</div>
+    <img id="iconeClima" src="" alt="Clima">
     <div id="temp">--°C</div>
     <div id="condicao">Carregando...</div>
-    <div id="chuva"></div>
+
+    <div id="extraInfo">
+        <div id="sensacao">Sensação térmica: --°C</div>
+        <div id="chuva">Chuva: -- mm</div>
+        <div id="vento">Vento: -- km/h</div>
+    </div>
 </div>
 
 <script>
-// =============== CONFIG ===============
+/* CONFIG */
 const API_KEY = "1dea43cad08e41d9907200706250812";
 const CITY = "São Paulo";
 const DELAY_CLIMA = 10000; // 10 segundos
-// ======================================
 
 const video = document.getElementById("video");
 const climaBox = document.getElementById("climaBox");
+const icone = document.getElementById("iconeClima");
 
 async function carregarClima() {
     try {
         const url = `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${CITY}&lang=pt`;
-        const response = await fetch(url);
-        const data = await response.json();
+        const r = await fetch(url);
+        const d = await r.json();
 
-        document.getElementById("temp").innerText = `${data.current.temp_c}°C`;
-        document.getElementById("condicao").innerText = data.current.condition.text;
-        document.getElementById("chuva").innerText = `Chance de chuva: ${data.current.precip_mm} mm`;
+        document.getElementById("temp").innerText = `${d.current.temp_c}°C`;
+        document.getElementById("condicao").innerText = d.current.condition.text;
 
-    } catch (e) {
+        icone.src = "https:" + d.current.condition.icon;
+
+        document.getElementById("sensacao").innerText =
+            `Sensação térmica: ${d.current.feelslike_c}°C`;
+
+        document.getElementById("chuva").innerText =
+            `Chuva: ${d.current.precip_mm} mm`;
+
+        document.getElementById("vento").innerText =
+            `Vento: ${d.current.wind_kph} km/h`;
+
+    } catch {
         document.getElementById("condicao").innerText = "Erro ao carregar clima";
     }
 }
 
 function mostrarClima() {
     climaBox.style.display = "block";
+
     setTimeout(() => {
         climaBox.style.display = "none";
         video.currentTime = 0;
