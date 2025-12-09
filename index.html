@@ -1,151 +1,199 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel de Vídeo + Clima</title>
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Painel Diário</title>
 <style>
     body {
         margin: 0;
         background: #000;
         overflow: hidden;
-        font-family: "Segoe UI", Arial, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    }
+
+    /* VIDEO FULLSCREEN */
+    #videoContainer {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background: #000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     video {
-        width: 100vw;
-        height: 100vh;
+        width: 100%;
+        height: 100%;
         object-fit: cover;
     }
 
-    /* Painel de clima estilo Apple */
-    #climaBox {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        display: none;
+    /* PAINEL DIÁRIO */
+#painel {
+    position: fixed;
+    inset: 0;
 
-        backdrop-filter: blur(12px) brightness(0.35);
-        -webkit-backdrop-filter: blur(12px) brightness(0.35);
+    background: radial-gradient(circle at 20% 20%, rgba(0, 200, 255, 0.35), rgba(10, 15, 35, 0.85));
+    backdrop-filter: blur(22px) saturate(220%);
+    -webkit-backdrop-filter: blur(22px) saturate(220%);
 
-        color: #fff;
-        text-align: center;
-        padding-top: 60px;
+    border: 1px solid rgba(0, 255, 255, 0.25);
+    box-shadow: 0 0 40px rgba(0, 255, 255, 0.25), inset 0 0 25px rgba(0, 150, 255, 0.15);
 
-        animation: fadeIn 0.6s ease forwards;
+    color: #dffaff;
+    padding: 40px;
+
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.caixa {
+    background: rgba(0, 30, 50, 0.45);
+    padding: 28px;
+    border-radius: 25px;
+    margin: 18px;
+    width: 80%;
+    max-width: 720px;
+
+    border: 1px solid rgba(0, 255, 255, 0.22);
+    box-shadow: 0 0 22px rgba(0, 255, 255, 0.18), inset 0 0 18px rgba(0, 120, 255, 0.15);
+
+    animation: fadeUp 0.8s ease;
+}
+
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
     }
-
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to   { opacity: 1; }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
+}
 
-    #titulo {
-        font-size: 3rem;
-        font-weight: 300;
+
+    .titulo {
+        font-size: 32px;
+        font-weight: bold;
         margin-bottom: 10px;
-        letter-spacing: 1px;
     }
 
-    #iconeClima {
-        width: 140px;
-        height: 140px;
-        margin: 0 auto 20px auto;
-    }
-
-    #temp {
-        font-size: 6rem;
-        font-weight: 200;
-        margin-bottom: 10px;
-    }
-
-    #condicao {
-        font-size: 2rem;
-        opacity: 0.9;
-        margin-bottom: 25px;
-    }
-
-    #extraInfo {
-        font-size: 1.6rem;
-        opacity: 0.85;
-        margin-top: 20px;
-        line-height: 2.4rem;
+    .texto {
+        font-size: 22px;
+        line-height: 1.5;
     }
 </style>
-
 </head>
 <body>
 
-<!-- VÍDEO DO DROPBOX -->
-<video id="video" autoplay muted playsinline>
-    <source src="https://www.dropbox.com/scl/fi/mx1gffddszn76nfmccrrf/video.mp4.mp4?rlkey=ic8n9kwmuvxvahukwkuwflysj&st=1p2ibi71&raw=1" type="video/mp4">
-</video>
+<!-- CONTAINER DO VÍDEO -->
+<div id="videoContainer">
+    <video id="meuVideo" autoplay muted playsinline>
+        <source src="https://www.dropbox.com/scl/fi/mx1gffddszn76nfmccrrf/video.mp4.mp4?rlkey=ic8n9kwmuvxvahukwkuwflysj&st=1p2ibi71&raw=1" type="video/mp4" />
+    </video>
+</div>
 
-<!-- PAINEL CLIMA -->
-<div id="climaBox">
-    <div id="titulo">São Paulo</div>
-    <img id="iconeClima" src="" alt="Clima">
-    <div id="temp">--°C</div>
-    <div id="condicao">Carregando...</div>
+<!-- PAINEL DIÁRIO (APÓS O VÍDEO) -->
+<div id="painel">
+    <div class="caixa">
+        <div class="titulo">Clima - São Paulo</div>
+        <div id="clima" class="texto">Carregando...</div>
+    </div>
 
-    <div id="extraInfo">
-        <div id="sensacao">Sensação térmica: --°C</div>
-        <div id="chuva">Chuva: -- mm</div>
-        <div id="vento">Vento: -- km/h</div>
+    <div class="caixa">
+        <div class="titulo">Dólar Agora</div>
+        <div id="dolar" class="texto">Carregando...</div>
+    </div>
+
+    <div class="caixa">
+        <div class="titulo">Horóscopo do Dia</div>
+        <div id="horoscopo" class="texto">Carregando...</div>
+    </div>
+
+    <div class="caixa">
+        <div class="titulo">Frase do Dia</div>
+        <div id="frase" class="texto">Carregando...</div>
     </div>
 </div>
 
 <script>
-/* CONFIG */
-const API_KEY = "1dea43cad08e41d9907200706250812";
-const CITY = "São Paulo";
-const DELAY_CLIMA = 10000; // 10 segundos
-
-const video = document.getElementById("video");
-const climaBox = document.getElementById("climaBox");
-const icone = document.getElementById("iconeClima");
-
+// ========= API WEATHER ============
 async function carregarClima() {
     try {
-        const url = `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${CITY}&lang=pt`;
-        const r = await fetch(url);
-        const d = await r.json();
-
-        document.getElementById("temp").innerText = `${d.current.temp_c}°C`;
-        document.getElementById("condicao").innerText = d.current.condition.text;
-
-        icone.src = "https:" + d.current.condition.icon;
-
-        document.getElementById("sensacao").innerText =
-            `Sensação térmica: ${d.current.feelslike_c}°C`;
-
-        document.getElementById("chuva").innerText =
-            `Chuva: ${d.current.precip_mm} mm`;
-
-        document.getElementById("vento").innerText =
-            `Vento: ${d.current.wind_kph} km/h`;
-
-    } catch {
-        document.getElementById("condicao").innerText = "Erro ao carregar clima";
+        let r = await fetch("https://api.weatherapi.com/v1/current.json?key=1dea43cad08e41d9907200706250812&q=Sao Paulo&lang=pt");
+        let j = await r.json();
+        document.getElementById("clima").innerHTML =
+            `${j.current.condition.text}<br>
+             🌡️ ${j.current.temp_c}°C | 💧 Umidade: ${j.current.humidity}%<br>
+             🌬️ Vento: ${j.current.wind_kph} km/h`;
+    } catch (e) {
+        document.getElementById("clima").innerText = "Erro ao carregar clima";
     }
 }
 
-function mostrarClima() {
-    climaBox.style.display = "block";
-
-    setTimeout(() => {
-        climaBox.style.display = "none";
-        video.currentTime = 0;
-        video.play();
-    }, DELAY_CLIMA);
+// ========= DÓLAR ============
+async function carregarDolar() {
+    try {
+        let r = await fetch("https://economia.awesomeapi.com.br/json/last/USD-BRL");
+        let j = await r.json();
+        document.getElementById("dolar").innerText = `R$ ${Number(j.USDBRL.bid).toFixed(2)}`;
+    } catch {
+        document.getElementById("dolar").innerText = "Erro ao carregar dólar";
+    }
 }
 
+// ========= HORÓSCOPO ============
+async function carregarHoroscopo() {
+    const lista = [
+        "Hoje é dia de boas energias e foco nos seus objetivos.",
+        "Uma oportunidade inesperada pode aparecer.",
+        "Confie na sua intuição hoje.",
+        "Momento favorável para fortalecer amizades.",
+        "Evite discussões e preserve sua paz.",
+        "Dia ideal para iniciar algo novo."
+    ];
+    document.getElementById("horoscopo").innerText = lista[Math.floor(Math.random()*lista.length)];
+}
+
+// ========= FRASE DO DIA ============
+function carregarFrase() {
+    const frases = [
+        "A persistência realiza o impossível.",
+        "Você é mais forte do que imagina.",
+        "Pequenos passos levam a grandes conquistas.",
+        "Seja a mudança que deseja ver no mundo.",
+        "Amanhã é um novo começo."
+    ];
+    document.getElementById("frase").innerText = frases[Math.floor(Math.random()*frases.length)];
+}
+
+// ========= LOOP: VÍDEO → PAINEL → VÍDEO ==========
+const video = document.getElementById("meuVideo");
+const painel = document.getElementById("painel");
+const videoContainer = document.getElementById("videoContainer");
+
 video.onended = () => {
+    videoContainer.style.display = "none";
+    painel.style.display = "flex";
+
     carregarClima();
-    mostrarClima();
+    carregarDolar();
+    carregarHoroscopo();
+    carregarFrase();
+
+    setTimeout(() => {
+        painel.style.display = "none";
+        videoContainer.style.display = "flex";
+        video.currentTime = 0;
+        video.play();
+    }, 20000);
 };
 </script>
 
